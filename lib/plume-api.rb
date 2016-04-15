@@ -1,3 +1,5 @@
+TEST TEST sur les branches
+
 require 'net/http'
 
 class PlumeApi
@@ -28,7 +30,7 @@ end
 
 # TEST avec ruby lib/plume-api.rb
 
-plume = PlumeApi.new('DejOAYxm2hTi6oKmHaxd8xvD')
+plume = PlumeApi.new('HERE_INSERT_ACCESS_TOKEN')
 
 plume.get_pollution_recent('PARIS', 'day')
 puts plume.pollution_recent
