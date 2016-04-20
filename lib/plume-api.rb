@@ -1,55 +1,46 @@
-require 'net/http'
+module PlumeApi
+  class Client
+    require_relative 'transliteration'
+    include Transliteration
 
-class PlumeApi
-  require_relative 'transliteration'
-  include Transliteration
+    attr_accessor :token, :pollution_recent, :pollution_forecast, :uv_forecast
 
-  attr_reader :token, :pollution_recent, :pollution_forecast, :uv_forecast
+    DOMAIN = "https://api.plume.io/1.0"
 
-  DOMAIN = "https://api.plume.io/1.0"
+    def initialize(options)
+      missing = [:token] - opts.keys
+      if missing.size > 0
+        raise PlumeApi::InvalidArgumentError, "Missing required options: #{missing.join(',')}"
+      end
+      @token = options[:token]
+    end
 
-  def initialize(token)
-    @token = token
-  end
+    # https://api.plume.io/1.0/pollution/recent?token=xxx&zone=PARIS&period=day
+    #
+    # token[String], zone[String], period[String]: day,month,year
+    #
+    def get_pollution_recent(zone, period)
+      zone = Transliteration.change(zone)
+      uri = URI(DOMAIN + "/pollution/recent?" + "token=" + @token + "&zone=" + zone + "&period=" + period)
+      @pollution_recent = Net::HTTP.get(uri)
+    end
 
-  def get_pollution_recent(zone, period)
-    zone = Transliteration.change(zone)
-    uri = URI(DOMAIN + "/pollution/recent?" + "token=" + @token + "&zone=" + zone + "&period=" + period)
-    @pollution_recent = Net::HTTP.get(uri)
-  end
+    # https://api.plume.io/1.0/pollution/forecast?token=xxx&lat=48.85&lon2.294
+    #
+    # token[String], lat[Float], lon[Float]
+    #
+    def get_pollution_forecast(lat, lon)
+      uri = URI(DOMAIN + "/pollution/forecast?" + "token=" + @token + "&lat=" + lat.to_s + "&lon=" + lon.to_s)
+      @pollution_forecast = Net::HTTP.get(uri)
+    end
 
-  def get_pollution_forecast(lat, lon)
-    uri = URI(DOMAIN + "/pollution/forecast?" + "token=" + @token + "&lat=" + lat.to_s + "&lon=" + lon.to_s)
-    @pollution_forecast = Net::HTTP.get(uri)
-  end
-
-  def get_uv_forecast(lat, lon)
-    uri = URI(DOMAIN + "/uv/forecast?" + "token=" + @token + "&lat=" + lat.to_s + "&lon=" + lon.to_s)
-    @uv_forecast = Net::HTTP.get(uri)
+    # https://api.plume.io/1.0/uv/forecast?token=xxx&lat=48.85&lon2.294
+    #
+    # token[String], lat[Float], lon[Float]
+    #
+    def get_uv_forecast(lat, lon)
+      uri = URI(DOMAIN + "/uv/forecast?" + "token=" + @token + "&lat=" + lat.to_s + "&lon=" + lon.to_s)
+      @uv_forecast = Net::HTTP.get(uri)
+    end
   end
 end
-
-# TEST avec ruby lib/plume-api.rb
-
-plume = PlumeApi.new('DejOAYxm2hTi6oKmHaxd8xvD')
-
-plume.get_pollution_recent('new-york', 'day')
-puts plume.pollution_recent
-
-
-# plume.get_pollution_forecast('48.8534100', '2.3488000')
-# puts plume.pollution_forecast
-
-# plume.get_uv_forecast('48.8534100', '2.3488000')
-# puts plume.uv_forecast
-
-# DOCUMENTATION
-
-# https://api.plume.io/1.0/pollution/recent?token=xxx&zone=PARIS&period=day
-# token(string), zone(string), period(string: day,month,year)
-
-# https://api.plume.io/1.0/pollution/forecast?token=xxx&lat=48.85&lon2.294
-# token(string), lat(float), lon(float)
-
-# https://api.plume.io/1.0/uv/forecast?token=xxx&lat=48.85&lon2.294
-# token(string), lat(float), lon(float)

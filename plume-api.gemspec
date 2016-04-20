@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'plume-api'
-  s.version     = '0.0.0'
+  s.version     = '0.0.1'
   s.date        = '2016-04-06'
   s.summary     = "First Plume API gem"
   s.description = "A simple plume gem"
