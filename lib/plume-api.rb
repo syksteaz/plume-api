@@ -1,10 +1,10 @@
-TEST TEST sur les branches
-
 require 'net/http'
 
 class PlumeApi
+  require_relative 'transliteration'
+  include Transliteration
 
-  attr_accessor :token, :pollution_recent, :pollution_forecast, :uv_forecast
+  attr_reader :token, :pollution_recent, :pollution_forecast, :uv_forecast
 
   DOMAIN = "https://api.plume.io/1.0"
 
@@ -13,6 +13,7 @@ class PlumeApi
   end
 
   def get_pollution_recent(zone, period)
+    zone = Transliteration.change(zone)
     uri = URI(DOMAIN + "/pollution/recent?" + "token=" + @token + "&zone=" + zone + "&period=" + period)
     @pollution_recent = Net::HTTP.get(uri)
   end
@@ -30,17 +31,17 @@ end
 
 # TEST avec ruby lib/plume-api.rb
 
-plume = PlumeApi.new('HERE_INSERT_ACCESS_TOKEN')
+plume = PlumeApi.new('DejOAYxm2hTi6oKmHaxd8xvD')
 
-plume.get_pollution_recent('PARIS', 'day')
+plume.get_pollution_recent('new-york', 'day')
 puts plume.pollution_recent
 
 
-plume.get_pollution_forecast('48.8534100', '2.3488000')
-puts plume.pollution_forecast
+# plume.get_pollution_forecast('48.8534100', '2.3488000')
+# puts plume.pollution_forecast
 
-plume.get_uv_forecast('48.8534100', '2.3488000')
-puts plume.uv_forecast
+# plume.get_uv_forecast('48.8534100', '2.3488000')
+# puts plume.uv_forecast
 
 # DOCUMENTATION
 
